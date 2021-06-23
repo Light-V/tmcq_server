@@ -15,12 +15,14 @@ const (
 )
 
 const (
-	B_C_DU = iota
-	B_C_JUN
+	B_C_JUN = iota
+	B_C_ZU
 	B_C_CHEN
-	B_C_DI
-	B_C_MENG
 	B_C_CE
+	B_C_MENG
+	B_C_DU
+	B_C_DI
+	B_C_QI
 )
 
 const (
