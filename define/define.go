@@ -30,3 +30,18 @@ const (
 	BASE_TAX     = 3
 	TAX_PER_TILE = 1
 )
+
+const (
+	M_EMPTY = iota
+	M_SHAN
+	M_SHUI
+	M_DAMO
+	M_NONGTIAN
+)
+
+const (
+	W_C_BU   = 1
+	W_C_GONG = 2
+	W_C_QI   = 3
+	W_C_CHE  = 4
+)

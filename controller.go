@@ -1,6 +1,8 @@
 package main
 
-import "main/define"
+import (
+	"main/define"
+)
 
 const (
 	PlayerNum = 4
@@ -41,14 +43,7 @@ func (this *Controller) RunNormalYear() {
 
 func (this *Controller) GetTax(playerID int) int {
 	tax := define.BASE_TAX
-	for i := 0; i < this.MapData.Height; i++ {
-		for j := 0; j < this.MapData.Width; j++ {
-			mt := this.MapData.GetTileAt(i, j)
-			if mt.OwnerID == playerID {
-				tax += define.TAX_PER_TILE
-			}
-		}
-	}
+	//TODO
 	return tax
 }
 
@@ -59,10 +54,22 @@ func NewController() *Controller {
 	players := make([]*Player, PlayerNum)
 	for i := 0; i < PlayerNum; i++ {
 		players[i] = &Player{
-			ID:      i,
-			Country: define.C_EMPTY,
-			Cards:   nil,
-			Money:   0,
+			ID:              i,
+			Country:         define.C_EMPTY,
+			Capital:         nil,
+			BlackCardsDeck:  nil,
+			WhiteCardsDeck:  nil,
+			BlackCardsInMap: nil,
+			CanUseBlackCard: false,
+			CanBuyWhite:     false,
+
+			PlayerBoard: PlayerBoard{
+				Money:                  0,
+				Morale:                 0,
+				MyBlackCardsInAlter:    nil,
+				OtherBlackCardsInAlter: nil,
+				Tools:                  nil,
+			},
 		}
 	}
 	round := 0

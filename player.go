@@ -1,6 +1,9 @@
 package main
 
-import "main/define"
+import (
+	"container/list"
+	"main/define"
+)
 
 type Player struct {
 	//玩家ID
@@ -10,10 +13,55 @@ type Player struct {
 	//都城
 	Capital *MapTile
 	//君主
-	//手牌
-	Cards []*Card
+
+	//黑卡手牌
+	BlackCardsDeck *list.List
+
+	//白卡手牌
+	WhiteCardsDeck *list.List
+
+	//该玩家在地图格上的黑卡
+	BlackCardsInMap *list.List
+
+	//能否出黑
+	CanUseBlackCard bool
+
+	//能否买白
+	CanBuyWhite bool
+
+	//玩家面板
+	PlayerBoard PlayerBoard
+}
+
+type PlayerBoard struct {
+
 	//金钱
 	Money int
+
+	//士气
+	Morale int
+
+	//武器
+
+	//祭坛中的己方黑卡
+	MyBlackCardsInAlter *list.List
+
+	//祭坛中的非己方黑卡
+	OtherBlackCardsInAlter *list.List
+
+	//间谍 越国 郑旦
+	Spy *list.List
+	//器物
+	Tools *list.List
+}
+
+func (this *Player) GetBlackCards(County int) {
+	//TODO 根据不同的国家来初始化玩家的手牌
+}
+
+func (this *Player) PutHumanCardToMap(mapTile *MapTile, blackCard *BlackCard) bool {
+
+	return false
 }
 
 // Select 选择势力&都城&君主
