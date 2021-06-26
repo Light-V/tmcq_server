@@ -1,5 +1,7 @@
 package main
 
-type WhiteCard interface {
-	Card
+type WhiteCard struct {
+	CardType int
+	Fight    int
+	BaseCost int
 }
