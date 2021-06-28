@@ -17,7 +17,9 @@ func NewDestinyPool() *DestinyPool {
 	available := list.New()
 	used := list.New()
 	//todo: 初始化天命
-	available.PushBack(&Destiny{})
+	for i := 0; i < 10; i++ {
+		available.PushBack(&Destiny{})
+	}
 	return &DestinyPool{available, used}
 }
 

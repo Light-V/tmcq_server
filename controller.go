@@ -2,6 +2,7 @@ package main
 
 import (
 	"main/define"
+	"main/logger"
 )
 
 const (
@@ -18,13 +19,19 @@ type Controller struct {
 }
 
 func (this *Controller) Run() {
+	logger.GetLogger().Println("元年开始")
+	logger.GetLogger().Println("玩家选择势力,都城,君主")
 	//元年
 	for _, player := range this.Players {
+		logger.GetLogger().Printf("玩家%d开始选择\n", player.ID)
 		player.Select(this)
+		logger.GetLogger().Printf("玩家%d选择完成\n", player.ID)
 	}
 	//正常循环
 	for {
+		logger.GetLogger().Printf("第%d年开始\n", this.Round)
 		this.RunNormalYear()
+		logger.GetLogger().Printf("第%d年结束\n", this.Round)
 	}
 }
 
@@ -39,6 +46,8 @@ func (this *Controller) RunNormalYear() {
 		this.GetTax(i)
 	}
 	//人事
+	//下一年
+	this.Round++
 }
 
 func (this *Controller) GetTax(playerID int) int {

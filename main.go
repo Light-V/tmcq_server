@@ -27,8 +27,8 @@ func (c Cat) Eat() string {
 
 func main() {
 
-	//c := NewController()
-	//c.Run()
+	c := NewController()
+	c.Run()
 	animal := Cat{}
 	t := reflect.TypeOf(animal)
 
