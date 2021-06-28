@@ -55,7 +55,7 @@ type PlayerBoard struct {
 	Tools *list.List
 }
 
-func (this *Player) GetBlackCards(County int) {
+func (this *Player) GetBlackCardsToMyDeck(County int) {
 	//TODO 根据不同的国家来初始化玩家的手牌
 }
 
@@ -80,35 +80,74 @@ func (this *Player) Select(c *Controller) {
 
 }
 
-func (this *Player) PutHumanCardToMap(mapTile *MapTile, humanCard *HumanCard) {
+func (this *Player) PutBlackCardToMap(mapTile *MapTile, blackCard BlackCard, controller *Controller) {
+	var cardType int = blackCard.GetCardType()
+	if cardType == define.B_C_JUN { //人类黑卡
+		humanCard, isHuman := blackCard.(HumanCard)
+		if isHuman {
+			//TODO 还有许多条件判定需要增加
+
+			this.HumanCardHelper(mapTile, humanCard)
+			humanCard.GetGold(controller)
+
+		}
+
+	} else if cardType == define.B_C_CHEN {
+		humanCard, isHuman := blackCard.(HumanCard)
+		if isHuman {
+			//TODO 还有许多条件判定需要增加
+			this.HumanCardHelper(mapTile, humanCard)
+		}
+
+	} else if cardType == define.B_C_ZU {
+		humanCard, isHuman := blackCard.(HumanCard)
+		if isHuman {
+			//TODO 还有许多条件判定需要增加
+			this.HumanCardHelper(mapTile, humanCard)
+		}
+
+	} else if cardType == define.B_C_DI { //地形卡
+		groundCard, isGround := blackCard.(GroundCard)
+		if isGround {
+			//TODO 还有许多条件判定需要增加
+			this.GroundCardHelper(mapTile, groundCard)
+		}
+
+	} else if cardType == define.B_C_DU {
+
+	} else if cardType == define.B_C_CE {
+
+	} else if cardType == define.B_C_MENG {
+
+	} else if cardType == define.B_C_QI {
+
+	}
 
 }
 
-func (this *Player) HumanCardHelper(mapTile *MapTile, humanCard *HumanCard) {
+func (this *Player) HumanCardHelper(mapTile *MapTile, humanCard HumanCard) {
 	//输入：mapTile可放置人类黑卡的地图格   blackCard人类黑卡
+	HumanAndGroundBase := humanCard.(*HumanAndGroundBase)
 	mapTile.HumanCards.PushBack(humanCard)
 	mapTile.RemainPutHuman -= 1
 	mapTile.OwnerCountry = this.Country
-	humanCard.CanMove = true
-	humanCard.MoveSteps = 1
-	humanCard.CanUseSkill = true
-	humanCard.X = mapTile.X
-	humanCard.Y = mapTile.Y
+	HumanAndGroundBase.CanMove = true
+	HumanAndGroundBase.MoveSteps = 1
+	HumanAndGroundBase.CanUseSkill = true
+	HumanAndGroundBase.X = mapTile.X
+	HumanAndGroundBase.Y = mapTile.Y
 }
 
-func (this *Player) PutGroundCardToMap(mapTile *MapTile, groundCard *GroundCard) {
-
-}
-
-func (this *Player) GroundCardHelper(mapTile *MapTile, groundCard *GroundCard) {
+func (this *Player) GroundCardHelper(mapTile *MapTile, groundCard GroundCard) {
 	//输入 mapTile可放置地形黑卡的地图格   groundCard地形黑卡
+	HumanAndGroundBase := groundCard.(*HumanAndGroundBase)
 	mapTile.GroundCards.PushBack(groundCard)
 	mapTile.RemainPutGround -= 1
-	groundCard.CanMove = false
-	groundCard.MoveSteps = 0
-	groundCard.CanUseSkill = true
-	groundCard.X = mapTile.X
-	groundCard.Y = mapTile.Y
+	HumanAndGroundBase.CanMove = false
+	HumanAndGroundBase.MoveSteps = 0
+	HumanAndGroundBase.CanUseSkill = true
+	HumanAndGroundBase.X = mapTile.X
+	HumanAndGroundBase.Y = mapTile.Y
 }
 
 func (this *Player) BuyWhiteCard(cardType int, number int) bool {
