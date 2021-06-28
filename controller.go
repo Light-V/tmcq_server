@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/list"
 	"main/define"
 	"main/logger"
 )
@@ -16,6 +17,19 @@ type Controller struct {
 	AvailableCountries []int
 	DestiniesInPool    *DestinyPool
 	MapData            *Map
+	// List of Register
+	AtBeginOfYear         *list.List
+	AtEndOfYear           *list.List
+	AtBeginOfDestiny      *list.List
+	BeforeActiveOfDestiny *list.List
+	AfterActiveOfDestiny  *list.List
+	BeforeTax             *list.List
+	AfterTax              *list.List
+	AtEndOfDestiny        *list.List
+	AtBeginOfRenshi       *list.List
+	AtEndOfRenshi         *list.List
+	BeforeAttack          *list.List
+	AfterAttack           *list.List
 }
 
 func (this *Controller) Run() {
@@ -38,14 +52,24 @@ func (this *Controller) Run() {
 func (this *Controller) RunNormalYear() {
 	//天时
 	//抽取天命
+	logger.GetLogger().Println("天时阶段开始")
 	destiny := this.DestiniesInPool.GetNextDestiny()
 	//发动天命
+	logger.GetLogger().Println("天命生效开始")
 	destiny.Activate()
+	logger.GetLogger().Println("天命生效结束")
+	logger.GetLogger().Println("天时阶段结束")
+	logger.GetLogger().Println("地利阶段开始")
 	//地利
 	for i := 0; i < PlayerNum; i++ {
+		logger.GetLogger().Printf("玩家%d获取税金开始", i)
 		this.GetTax(i)
+		logger.GetLogger().Printf("玩家%d获取税金结束", i)
 	}
+	logger.GetLogger().Println("地利阶段结束")
 	//人事
+	logger.GetLogger().Println("人事阶段开始")
+	logger.GetLogger().Println("人事阶段结束")
 	//下一年
 	this.Round++
 }
@@ -81,7 +105,7 @@ func NewController() *Controller {
 			},
 		}
 	}
-	round := 0
+	round := 1
 	c := &Controller{
 		Round:              round,
 		MapData:            mapData,

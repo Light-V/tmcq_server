@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"main/util"
 	"math/rand"
+	"time"
 )
 
 type DestinyPool struct {
@@ -14,6 +15,7 @@ type DestinyPool struct {
 }
 
 func NewDestinyPool() *DestinyPool {
+	rand.Seed(int64(time.Now().Nanosecond()))
 	available := list.New()
 	used := list.New()
 	//todo: 初始化天命

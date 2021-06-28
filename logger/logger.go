@@ -13,7 +13,7 @@ func GetLogger() *log.Logger {
 	mu.Lock()
 	defer mu.Unlock()
 	if logger == nil {
-		logger = log.New(os.Stdout, "[bar]", log.Lshortfile|log.Ldate|log.Ltime)
+		logger = log.New(os.Stdout, "[test]", log.Lshortfile|log.Ldate|log.Ltime)
 	}
 	return logger
 }
