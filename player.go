@@ -3,6 +3,7 @@ package main
 import (
 	"container/list"
 	"main/define"
+	"main/logger"
 )
 
 type Player struct {
@@ -10,15 +11,18 @@ type Player struct {
 	ID int
 	//势力
 	Country int
-	//都城
+	//都城所在地图格子
 	Capital *MapTile
-	//君主
-
+	//君主所在地图格子
+	Lord *MapTile
 	//黑卡手牌
 	BlackCardsDeck *list.List
 
 	//白卡手牌
-	WhiteCardsDeck *list.List
+	BuNum   int
+	GongNum int
+	QiNum   int
+	CheNum  int
 
 	//该玩家在地图格上的黑卡
 	BlackCardsInMap *list.List
@@ -80,15 +84,26 @@ func (this *Player) Select(c *Controller) {
 
 }
 
-func (this *Player) PutBlackCardToMap(mapTile *MapTile, blackCard BlackCard, controller *Controller) {
+func (this *Player) PutBlackCardToMap(mapTile *MapTile, blackCard BlackCard, controller *Controller) bool {
 	var cardType int = blackCard.GetCardType()
 	if cardType == define.B_C_JUN { //人类黑卡
 		humanCard, isHuman := blackCard.(HumanCard)
 		if isHuman {
 			//TODO 还有许多条件判定需要增加
 
-			this.HumanCardHelper(mapTile, humanCard)
-			humanCard.GetGold(controller)
+			if mapTile != this.Lord && mapTile != this.Capital { //选择的地图格与当前君主的地图格
+				return false
+			} else if mapTile == this.Lord { //替换当前国君
+
+				this.PutHumanCardHelper(mapTile, humanCard)
+				humanCard.GetGold(controller)
+				return true
+			} else if mapTile == this.Capital {
+				this.PutHumanCardHelper(mapTile, humanCard)
+				humanCard.GetGold(controller)
+				return true
+
+			}
 
 		}
 
@@ -96,36 +111,28 @@ func (this *Player) PutBlackCardToMap(mapTile *MapTile, blackCard BlackCard, con
 		humanCard, isHuman := blackCard.(HumanCard)
 		if isHuman {
 			//TODO 还有许多条件判定需要增加
-			this.HumanCardHelper(mapTile, humanCard)
+			this.PutHumanCardHelper(mapTile, humanCard)
 		}
 
 	} else if cardType == define.B_C_ZU {
 		humanCard, isHuman := blackCard.(HumanCard)
 		if isHuman {
 			//TODO 还有许多条件判定需要增加
-			this.HumanCardHelper(mapTile, humanCard)
+			this.PutHumanCardHelper(mapTile, humanCard)
 		}
 
 	} else if cardType == define.B_C_DI { //地形卡
 		groundCard, isGround := blackCard.(GroundCard)
 		if isGround {
 			//TODO 还有许多条件判定需要增加
-			this.GroundCardHelper(mapTile, groundCard)
+			this.PutGroundCardHelper(mapTile, groundCard)
 		}
-
-	} else if cardType == define.B_C_DU {
-
-	} else if cardType == define.B_C_CE {
-
-	} else if cardType == define.B_C_MENG {
-
-	} else if cardType == define.B_C_QI {
-
 	}
-
+	return false
 }
 
-func (this *Player) HumanCardHelper(mapTile *MapTile, humanCard HumanCard) {
+func (this *Player) PutHumanCardHelper(mapTile *MapTile, humanCard HumanCard) {
+	logger.GetLogger().Println("")
 	//输入：mapTile可放置人类黑卡的地图格   blackCard人类黑卡
 	HumanAndGroundBase := humanCard.(*HumanAndGroundBase)
 	mapTile.HumanCards.PushBack(humanCard)
@@ -138,7 +145,7 @@ func (this *Player) HumanCardHelper(mapTile *MapTile, humanCard HumanCard) {
 	HumanAndGroundBase.Y = mapTile.Y
 }
 
-func (this *Player) GroundCardHelper(mapTile *MapTile, groundCard GroundCard) {
+func (this *Player) PutGroundCardHelper(mapTile *MapTile, groundCard GroundCard) {
 	//输入 mapTile可放置地形黑卡的地图格   groundCard地形黑卡
 	HumanAndGroundBase := groundCard.(*HumanAndGroundBase)
 	mapTile.GroundCards.PushBack(groundCard)
@@ -153,14 +160,25 @@ func (this *Player) GroundCardHelper(mapTile *MapTile, groundCard GroundCard) {
 func (this *Player) BuyWhiteCard(cardType int, number int) bool {
 	var cost int = cardType * number
 	if this.PlayerBoard.Money >= cost {
-		for i := 0; i < number; i++ {
-			this.WhiteCardsDeck.PushBack(WhiteCard{cardType, cardType, cardType})
-		}
+		this.ReceiveWhiteCard(cardType, number)
 		this.PlayerBoard.Money -= cost
 		return true
 	}
 
 	return false
+}
+
+func (this *Player) ReceiveWhiteCard(cardType int, number int) {
+	if cardType == define.W_C_BU {
+		this.BuNum += number
+	} else if cardType == define.W_C_GONG {
+		this.GongNum += number
+	} else if cardType == define.W_C_QI {
+		this.QiNum += number
+	} else if cardType == define.W_C_CHE {
+		this.CheNum += number
+	}
+
 }
 
 func (this *Player) MoveBlackCardToMapTile(mapTile *MapTile, blackCard *BlackCard) {
