@@ -6,9 +6,11 @@ type BlackCard interface {
 	IsSatisfyEffectCondition(controller *Controller) bool
 	TriggerEffect(controller *Controller) bool
 	GetCardType() int
+	GetCardID() int
 }
 
 type HumanAndGroundBase struct {
+	ID int
 	//战力
 	Fight int
 	//进场给国库的金币
@@ -61,6 +63,11 @@ func (this *HumanAndGroundBase) TriggerEffect(controller *Controller) bool {
 func (this *HumanAndGroundBase) GetCardType() int {
 
 	return this.CardType
+}
+
+func (this *HumanAndGroundBase) GetCardID() int {
+
+	return this.ID
 }
 
 func (this *HumanAndGroundBase) GetGold(controller *Controller) {

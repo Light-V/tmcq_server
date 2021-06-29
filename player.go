@@ -15,6 +15,9 @@ type Player struct {
 	Capital *MapTile
 	//君主所在地图格子
 	Lord *MapTile
+	//钱
+	Money int
+
 	//黑卡手牌
 	BlackCardsDeck *list.List
 
@@ -183,4 +186,23 @@ func (this *Player) ReceiveWhiteCard(cardType int, number int) {
 
 func (this *Player) MoveBlackCardToMapTile(mapTile *MapTile, blackCard *BlackCard) {
 	//输入：
+}
+
+func (this *Player) JinGong(amount int) bool {
+	if amount <= 0 || amount > this.Money {
+		return false
+	} else {
+		this.Money -= amount
+	}
+	return true
+}
+
+func (this *Player) CheckBlackCardDeck(id int) BlackCard {
+	for i := this.BlackCardsDeck.Front(); i != nil; i = i.Next() {
+		bc := i.Value.(BlackCard)
+		if bc.GetCardID() == id {
+			return bc
+		}
+	}
+	return nil
 }

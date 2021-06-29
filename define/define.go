@@ -32,6 +32,12 @@ const (
 )
 
 const (
+	NOT_EXEC_BLAKC_OR_WHITE = iota
+	BLACK_STAGE
+	WHITE_STAGE
+)
+
+const (
 	M_EMPTY = iota
 	M_SHAN
 	M_SHUI
