@@ -15,8 +15,6 @@ type Player struct {
 	Capital *MapTile
 	//君主所在地图格子
 	Lord *MapTile
-	//钱
-	Money int
 
 	//黑卡手牌
 	//BlackCardsDeck []BlackCard
@@ -51,6 +49,12 @@ type PlayerBoard struct {
 
 	//武器
 
+	//兵种武器
+	BuWeaponNum   int
+	GongWeaponNum int
+	QiWeaponNum   int
+	CheWeaponNum  int
+
 	//祭坛中的己方黑卡
 	MyBlackCardsInAlter *list.List
 
@@ -61,6 +65,11 @@ type PlayerBoard struct {
 	Spy *list.List
 	//器物
 	Tools *list.List
+}
+
+func (this Player) changeMoney(num int) {
+	// todo
+	this.PlayerBoard.Morale += num
 }
 
 func (this *Player) GetBlackCardsToMyDeck(County int) {
@@ -269,7 +278,7 @@ func (this *Player) BuyWhiteCard(cardType int, number int) bool {
 	var cost int = cardType * number
 	if this.PlayerBoard.Money >= cost {
 		this.ReceiveWhiteCard(cardType, number)
-		this.PlayerBoard.Money -= cost
+		this.changeMoney(-cost)
 		return true
 	}
 
@@ -311,10 +320,10 @@ func (this *Player) MoveCapital(maptile *MapTile) {
 }
 
 func (this *Player) JinGong(amount int) bool {
-	if amount <= 0 || amount > this.Money {
+	if amount <= 0 || amount > this.PlayerBoard.Money {
 		return false
 	} else {
-		this.Money -= amount
+		this.changeMoney(-amount)
 	}
 	return true
 }
@@ -327,4 +336,102 @@ func (this *Player) CheckBlackCardDeck(id int) BlackCard {
 		}
 	}
 	return nil
+}
+
+func (this *Player) BuyWeapon(weaponType int) bool {
+	switch weaponType {
+	case define.WEAPON_BU:
+		if this.PlayerBoard.BuWeaponNum > 0 {
+			return false
+		}
+		if this.PlayerBoard.Money >= define.PRICE_WEAPON_BU {
+			this.changeMoney(-define.PRICE_WEAPON_BU)
+			this.PlayerBoard.BuWeaponNum += 1
+			return true
+		}
+
+	case define.WEAPON_GONG:
+		if this.PlayerBoard.GongWeaponNum > 0 {
+			return false
+		}
+		if this.PlayerBoard.Money >= define.PRICE_WEAPON_GONG {
+			this.changeMoney(-define.PRICE_WEAPON_GONG)
+			this.PlayerBoard.GongWeaponNum += 1
+			return true
+		}
+
+	case define.WEAPON_QI:
+		if this.PlayerBoard.QiWeaponNum > 0 {
+			return false
+		}
+		if this.PlayerBoard.Money >= define.PRICE_WEAPON_QI {
+			this.changeMoney(-define.PRICE_WEAPON_QI)
+			this.PlayerBoard.QiWeaponNum += 1
+			return true
+		}
+
+	case define.WEAPON_CHE:
+		if this.PlayerBoard.CheWeaponNum > 0 {
+			return false
+		}
+		if this.PlayerBoard.Money >= define.PRICE_WEAPON_CHE {
+			this.changeMoney(-define.PRICE_WEAPON_CHE)
+			this.PlayerBoard.CheWeaponNum += 1
+			return true
+		}
+
+	default:
+		return false
+
+	}
+	return true
+}
+
+func (this Player) SellWeapon(weaponType int) bool {
+	switch weaponType {
+	case define.WEAPON_BU:
+		if this.PlayerBoard.BuWeaponNum == 0 {
+			return false
+		}
+		if this.PlayerBoard.Money >= define.PRICE_WEAPON_BU {
+			this.changeMoney(define.PRICE_WEAPON_BU)
+			this.PlayerBoard.BuWeaponNum -= 1
+			return true
+		}
+
+	case define.WEAPON_GONG:
+		if this.PlayerBoard.GongWeaponNum == 0 {
+			return false
+		}
+		if this.PlayerBoard.Money >= define.PRICE_WEAPON_GONG {
+			this.changeMoney(define.PRICE_WEAPON_GONG)
+			this.PlayerBoard.GongWeaponNum -= 1
+			return true
+		}
+
+	case define.WEAPON_QI:
+		if this.PlayerBoard.QiWeaponNum == 0 {
+			return false
+		}
+		if this.PlayerBoard.Money >= define.PRICE_WEAPON_QI {
+			this.changeMoney(define.PRICE_WEAPON_QI)
+			this.PlayerBoard.QiWeaponNum -= 1
+			return true
+		}
+
+	case define.WEAPON_CHE:
+		if this.PlayerBoard.CheWeaponNum == 0 {
+			return false
+		}
+		if this.PlayerBoard.Money >= define.PRICE_WEAPON_CHE {
+			this.changeMoney(define.PRICE_WEAPON_CHE)
+			this.PlayerBoard.CheWeaponNum -= 1
+			return true
+		}
+
+	default:
+		return false
+
+	}
+	return true
 }

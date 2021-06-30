@@ -5,6 +5,10 @@ const (
 	MSG_JINGONG
 	MSG_USEBLACKCARD
 	MSG_BUYWHITECARD
+	MSG_BUYWEAPON
+	MSG_BUYSHIQI
+	MSG_SELLWEAPON
+	MSG_SELLBLACKCARD
 )
 
 type Message interface {
@@ -24,6 +28,8 @@ type JinGongMessage struct {
 	Amount int
 }
 
+// 行政阶段
+
 type UseBlackMessage struct {
 	Message
 	BlackCardID int
@@ -35,4 +41,24 @@ type BuyWhiteMessage struct {
 	Message
 	WhiteCardType int
 	WhiteCardNum  int
+}
+
+// 休整阶段
+
+type BuyWeaponMessage struct {
+	Message
+	WeaponType int
+}
+
+type BuyShiQiMessage struct {
+	Message
+}
+
+type SellWeaponMessage struct {
+	Message
+	WeaponType int
+}
+
+type SellBlackCardMessage struct {
+	Message
 }
