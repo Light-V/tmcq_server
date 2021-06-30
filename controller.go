@@ -186,8 +186,16 @@ func (this *Controller) RunNormalYear() {
 					continue
 				case MSG_BUYSHIQI:
 					// todo
+					bs := msg.(BuyShiQiMessage)
+					res := currentPlayer.BuyShiQi(bs.TargetShiQi)
+					if !res {
+
+						//购买失败
+						break
+					}
 					//执行成功 进入修整阶段
 					currentStage = define.STAGE_XINGZHENG
+					continue
 				case MSG_SELLBLACKCARD:
 					// todo
 					//执行成功 进入修整阶段
@@ -272,4 +280,27 @@ func NewController() *Controller {
 		Countries:          availableCountries,
 	}
 	return c
+}
+
+func (this Player) BuyShiQi(target int) bool {
+	from := this.PlayerBoard.Morale
+	if from >= len(define.PRICE_SHIQI) {
+		// 满士气 无法购买
+		return false
+	}
+	if from <= target || from <= 0 {
+		// 士气已达到 无法购买
+		return false
+	}
+	TotalCost := 0
+	for i := from + 1; i <= target; i++ {
+		TotalCost += define.PRICE_SHIQI[i]
+	}
+	if TotalCost > this.PlayerBoard.Money {
+		// 金钱不足
+		return false
+	}
+	this.changeMoney(-TotalCost)
+	return true
+
 }

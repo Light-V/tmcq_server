@@ -52,6 +52,7 @@ type BuyWeaponMessage struct {
 
 type BuyShiQiMessage struct {
 	Message
+	TargetShiQi int
 }
 
 type SellWeaponMessage struct {
