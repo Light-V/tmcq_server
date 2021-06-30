@@ -21,19 +21,26 @@ func (this *ZhengZhuangGong) IsSatisfyEffectCondition(controller *Controller) bo
 }
 
 //发动被动效果
-func (this *ZhengZhuangGong) TriggerEffect(controller *Controller) bool {
+func (this *ZhengZhuangGong) TriggerEffect(controller *Controller) {
 	if this.IsSatisfyEffectCondition(controller) {
 
 		//TODO
 
-		return true
 	}
-	return false
+
 }
 
 func (this *ZhengZhuangGong) GetCardType() int {
 
 	return this.HumanAndGroundBase.CardType
+}
+
+func (this *ZhengZhuangGong) TriggerLeaveMapEffect(controller *Controller) {
+
+}
+
+func (this *ZhengZhuangGong) TriggerEnterAlterEffect(controller *Controller) {
+
 }
 
 func (this *ZhengZhuangGong) GetGold(controller *Controller) {

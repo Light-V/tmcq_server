@@ -4,7 +4,9 @@ type BlackCard interface {
 	IsSatisfySkillCondition(controller *Controller) bool
 	UseSkill(controller *Controller) bool
 	IsSatisfyEffectCondition(controller *Controller) bool
-	TriggerEffect(controller *Controller) bool
+	TriggerEffect(controller *Controller)
+	TriggerLeaveMapEffect(controller *Controller)
+	TriggerEnterAlterEffect(controller *Controller)
 	GetCardType() int
 	GetCardID() int
 }
@@ -52,12 +54,19 @@ func (this *HumanAndGroundBase) IsSatisfyEffectCondition(controller *Controller)
 }
 
 //发动被动效果
-func (this *HumanAndGroundBase) TriggerEffect(controller *Controller) bool {
+func (this *HumanAndGroundBase) TriggerEffect(controller *Controller) {
 	if this.IsSatisfyEffectCondition(controller) {
 
-		return true
 	}
-	return false
+
+}
+
+func (this *HumanAndGroundBase) TriggerLeaveMapEffect(controller *Controller) {
+
+}
+
+func (this *HumanAndGroundBase) TriggerEnterAlterEffect(controller *Controller) {
+
 }
 
 func (this *HumanAndGroundBase) GetCardType() int {

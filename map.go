@@ -42,6 +42,8 @@ type MapTile struct {
 	ZhongJunType    int
 	XiaJunType      int
 
+	//CanBePutBlacCard bool
+
 	CanAttackZhou bool
 
 	CanAttack bool
@@ -49,7 +51,7 @@ type MapTile struct {
 	CanBeAttacked bool
 }
 
-func (this *Map) isValidTile(x int, y int) bool {
+func (this *Map) IsValidTile(x int, y int) bool {
 	if x >= 0 && x < this.Width && y >= 0 && y < this.Height {
 		return true
 	}
@@ -61,18 +63,22 @@ func (this *Map) GetTileAt(x, y int) *MapTile {
 	return this.Tiles[x][y]
 }
 
-func (this *Map) GetWhiteCardFromTileTODeck(tile *MapTile, player *Player) {
-	if tile.QianJunType != 0 {
-		player.ReceiveWhiteCard(tile.QianJunType, 1)
-		tile.QianJunType = 0
+func (this *MapTile) GetWhiteCardFromThisTileTODeck(player *Player) {
+	if this.QianJunType != 0 {
+		player.ReceiveWhiteCard(this.QianJunType, 1)
+		this.QianJunType = 0
 	}
-	if tile.ZhongJunType != 0 {
-		player.ReceiveWhiteCard(tile.ZhongJunType, 1)
-		tile.ZhongJunType = 0
+	if this.ZhongJunType != 0 {
+		player.ReceiveWhiteCard(this.ZhongJunType, 1)
+		this.ZhongJunType = 0
 	}
-	if tile.XiaJunType != 0 {
-		player.ReceiveWhiteCard(tile.XiaJunType, 1)
-		tile.XiaJunType = 0
+	if this.XiaJunType != 0 {
+		player.ReceiveWhiteCard(this.XiaJunType, 1)
+		this.XiaJunType = 0
 	}
+
+}
+
+func (this *MapTile) UpdateMapTileOwner() {
 
 }

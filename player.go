@@ -19,6 +19,7 @@ type Player struct {
 	Money int
 
 	//黑卡手牌
+	//BlackCardsDeck []BlackCard
 	BlackCardsDeck *list.List
 
 	//白卡手牌
@@ -28,7 +29,7 @@ type Player struct {
 	CheNum  int
 
 	//该玩家在地图格上的黑卡
-	BlackCardsInMap *list.List
+	//BlackCardsInMap []BlackCard
 
 	//能否出黑
 	CanUseBlackCard bool
@@ -75,37 +76,29 @@ func (this *Player) Select(c *Controller) {
 		//都城
 		this.Capital = c.MapData.GetTileAt(0, 0)
 		//TODO 君主
-
+		this.Lord = c.MapData.GetTileAt(0, 0)
 	} else {
 		//势力
 		this.Country = define.C_ZHENG
 		//都城
 		this.Capital = c.MapData.GetTileAt(0, 4)
 		//TODO 君主
+		this.Lord = c.MapData.GetTileAt(0, 4)
 
 	}
 
 }
 
 func (this *Player) PutBlackCardToMap(mapTile *MapTile, blackCard BlackCard, controller *Controller) bool {
+	//
 	var cardType int = blackCard.GetCardType()
+
 	if cardType == define.B_C_JUN { //人类黑卡
-		humanCard, isHuman := blackCard.(HumanCard)
+		newLord, isHuman := blackCard.(HumanCard)
 		if isHuman {
-			//TODO 还有许多条件判定需要增加
 
-			if mapTile != this.Lord && mapTile != this.Capital { //选择的地图格与当前君主的地图格
-				return false
-			} else if mapTile == this.Lord { //替换当前国君
-
-				this.PutHumanCardHelper(mapTile, humanCard)
-				humanCard.GetGold(controller)
-				return true
-			} else if mapTile == this.Capital {
-				this.PutHumanCardHelper(mapTile, humanCard)
-				humanCard.GetGold(controller)
-				return true
-
+			if true /*TODO 还有许多条件判定需要增加*/ {
+				return this.PutKingHelper(mapTile, newLord, controller)
 			}
 
 		}
@@ -113,39 +106,141 @@ func (this *Player) PutBlackCardToMap(mapTile *MapTile, blackCard BlackCard, con
 	} else if cardType == define.B_C_CHEN {
 		humanCard, isHuman := blackCard.(HumanCard)
 		if isHuman {
-			//TODO 还有许多条件判定需要增加
-			this.PutHumanCardHelper(mapTile, humanCard)
+			if true /*TODO 还有许多条件判定需要增加*/ {
+				this.PutHumanCardHelper(mapTile, humanCard)
+				humanCard.GetGold(controller)
+			}
 		}
 
 	} else if cardType == define.B_C_ZU {
 		humanCard, isHuman := blackCard.(HumanCard)
 		if isHuman {
-			//TODO 还有许多条件判定需要增加
-			this.PutHumanCardHelper(mapTile, humanCard)
+			if true /*TODO 还有许多条件判定需要增加*/ {
+				this.PutHumanCardHelper(mapTile, humanCard)
+				humanCard.GetGold(controller)
+			}
 		}
 
 	} else if cardType == define.B_C_DI { //地形卡
 		groundCard, isGround := blackCard.(GroundCard)
 		if isGround {
-			//TODO 还有许多条件判定需要增加
 			this.PutGroundCardHelper(mapTile, groundCard)
+			if true /*TODO 还有许多条件判定需要增加*/ {
+				this.PutGroundCardHelper(mapTile, groundCard)
+			}
 		}
 	}
 	return false
 }
 
+func (this *Player) PutKingHelper(mapTile *MapTile, newLord HumanCard, controller *Controller) bool {
+	if mapTile != this.Lord && mapTile != this.Capital { //选择的地图格与当前君主的地图格不相等并且与当前国都的地图格也不相等
+		return false
+	} else if mapTile == this.Lord { //选择的地图格就是旧国君所在地图格
+		for i := this.Lord.HumanCards.Front(); i != nil; i = i.Next() { //从该地图格中删除旧国君
+			if i.Value.(BlackCard).GetCardType() == define.B_C_JUN {
+				oldLord := i.Value.(BlackCard) //旧国君
+				oldLord_human, _ := oldLord.(HumanCard)
+				oldLord_base := oldLord_human.(*HumanAndGroundBase)
+
+				//TODO 发动旧国君退场的效果
+				oldLord.TriggerLeaveMapEffect(controller)
+
+				//进入祭坛，  属性复原
+
+				this.PlayerBoard.MyBlackCardsInAlter.PushBack(oldLord)
+
+				oldLord_base.CanMove = false
+				oldLord_base.MoveSteps = 0
+				oldLord_base.CanUseSkill = false
+				oldLord_base.X = -1
+				oldLord_base.Y = -1
+
+				//TODO 发动进入祭坛效果
+				oldLord.TriggerEnterAlterEffect(controller)
+
+				//地图格操作
+				this.Lord.HumanCards.Remove(i)
+				this.Lord.RemainPutHuman += 1
+				break
+
+			}
+		}
+
+		//TODO 新国君打入场上并发动入场效果
+		this.PutHumanCardHelper(mapTile, newLord)
+		newLord.TriggerEffect(controller)
+		newLord.GetGold(controller)
+		//this.Lord = mapTile
+		return true
+	} else if mapTile == this.Capital { //选择的地图格是当前国都的地图格
+		if mapTile.RemainPutHuman < 1 {
+			return false
+		}
+
+		oldLordTile := this.Lord
+		for i := oldLordTile.HumanCards.Front(); i != nil; i = i.Next() { //从该地图格中删除旧国君
+			if i.Value.(BlackCard).GetCardType() == define.B_C_JUN {
+				oldLord := i.Value.(BlackCard) //旧国君
+				oldLord_human, _ := oldLord.(HumanCard)
+				oldLord_base := oldLord_human.(*HumanAndGroundBase)
+
+				//TODO 发动旧国君退场的效果
+				oldLord.TriggerLeaveMapEffect(controller)
+
+				//进入祭坛，  属性复原
+
+				this.PlayerBoard.MyBlackCardsInAlter.PushBack(oldLord)
+
+				oldLord_base.CanMove = false
+				oldLord_base.MoveSteps = 0
+				oldLord_base.CanUseSkill = false
+				oldLord_base.X = -1
+				oldLord_base.Y = -1
+
+				//TODO 发动进入祭坛效果
+				oldLord.TriggerEnterAlterEffect(controller)
+
+				//地图格操作
+				oldLordTile.HumanCards.Remove(i)              //剔除旧国君
+				mapTile.RemainPutHuman += 1                   //可放置人类卡数量+1
+				oldLordTile.UpdateMapTileOwner()              //更新旧君主所在地图格主人
+				if oldLordTile.OwnerCountry != this.Country { //如果旧君主所在的地图格不属于我，那么将该地图格白卡收回我的手牌
+					oldLordTile.GetWhiteCardFromThisTileTODeck(this)
+				}
+				break
+
+			}
+		}
+
+		//TODO 新国君打入场上并发动入场效果
+		this.PutHumanCardHelper(mapTile, newLord)
+		newLord.TriggerEffect(controller)
+		newLord.GetGold(controller)
+		this.Lord = mapTile
+		return true
+
+	}
+
+	return false
+
+}
+
 func (this *Player) PutHumanCardHelper(mapTile *MapTile, humanCard HumanCard) {
 	logger.GetLogger().Println("")
 	//输入：mapTile可放置人类黑卡的地图格   blackCard人类黑卡
+
 	HumanAndGroundBase := humanCard.(*HumanAndGroundBase)
 	mapTile.HumanCards.PushBack(humanCard)
 	mapTile.RemainPutHuman -= 1
 	mapTile.OwnerCountry = this.Country
+
 	HumanAndGroundBase.CanMove = true
 	HumanAndGroundBase.MoveSteps = 1
 	HumanAndGroundBase.CanUseSkill = true
 	HumanAndGroundBase.X = mapTile.X
 	HumanAndGroundBase.Y = mapTile.Y
+
 }
 
 func (this *Player) PutGroundCardHelper(mapTile *MapTile, groundCard GroundCard) {
@@ -158,6 +253,16 @@ func (this *Player) PutGroundCardHelper(mapTile *MapTile, groundCard GroundCard)
 	HumanAndGroundBase.CanUseSkill = true
 	HumanAndGroundBase.X = mapTile.X
 	HumanAndGroundBase.Y = mapTile.Y
+}
+
+func (this *Player) UseStrategyOrUnitOrToolCard(controller *Controller, blackCard BlackCard) bool {
+
+	if true /*TODO 补充出黑判定*/ {
+		blackCard.TriggerEffect(controller)
+		blackCard.TriggerEnterAlterEffect(controller)
+		return true
+	}
+	return false
 }
 
 func (this *Player) BuyWhiteCard(cardType int, number int) bool {
@@ -184,8 +289,25 @@ func (this *Player) ReceiveWhiteCard(cardType int, number int) {
 
 }
 
-func (this *Player) MoveBlackCardToMapTile(mapTile *MapTile, blackCard *BlackCard) {
-	//输入：
+func (this *Player) MoveBlackCardToOtherMapTile(otherMapTile *MapTile, blackCard BlackCard, controller *Controller) {
+	cardType := blackCard.GetCardType()
+	if true /*TODO 是否能够移动到目标地图格的相关判定*/ {
+		if cardType == 1 || cardType == 2 || cardType == 3 {
+			humanCard, _ := blackCard.(HumanCard)
+			humanBase := humanCard.(*HumanAndGroundBase)
+			currMapTile := controller.MapData.GetTileAt(humanBase.X, humanBase.Y)
+
+			//TODO 旧地图格相关修改
+			currMapTile.RemainPutHuman -= 1
+
+		}
+	}
+
+}
+
+func (this *Player) MoveCapital(maptile *MapTile) {
+
+	this.Capital = maptile
 }
 
 func (this *Player) JinGong(amount int) bool {

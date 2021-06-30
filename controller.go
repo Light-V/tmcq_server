@@ -17,11 +17,6 @@ type Controller struct {
 	AvailableCountries []int
 	DestiniesInPool    *DestinyPool
 	MapData            *Map
-	SeqOfCurrentRound  []int
-
-	// 消息队列
-	MessageChan chan *Message
-
 	// List of Register
 	AtBeginOfYear         *list.List
 	AtEndOfYear           *list.List
@@ -48,12 +43,13 @@ func (this *Controller) Run() {
 	}
 	//正常循环
 	for {
+		logger.GetLogger().Printf("第%d年开始\n", this.Round)
 		this.RunNormalYear()
+		logger.GetLogger().Printf("第%d年结束\n", this.Round)
 	}
 }
 
 func (this *Controller) RunNormalYear() {
-	logger.GetLogger().Printf("第%d年开始\n", this.Round)
 	//天时
 	//抽取天命
 	logger.GetLogger().Println("天时阶段开始")
@@ -73,107 +69,7 @@ func (this *Controller) RunNormalYear() {
 	logger.GetLogger().Println("地利阶段结束")
 	//人事
 	logger.GetLogger().Println("人事阶段开始")
-	for idx, id := range this.SeqOfCurrentRound {
-		currentPlayer := this.Players[id]
-		logger.GetLogger().Printf("本年第%d个人事阶段开始,属于玩家%d", idx, id)
-		// 默认未进贡
-		hasJinGongOrPunished := false
-		// 默认未执行出黑/买白
-		execBlackOrWhite := define.NOT_EXEC_BLAKC_OR_WHITE
-		// 进贡阶段 & 行政
-		var msg Message
-		for {
-			isEndXingZheng := false
-			msg = *(<-this.MessageChan)
-			msgType := msg.GetType()
-			if msgType == MSG_JINGONG {
-				if hasJinGongOrPunished {
-					// todo 通知客户端
-					logger.GetLogger().Printf("玩家%d进贡失败，重复进贡或已受惩罚", id)
-				}
-				jm := msg.(JinGongMessage)
-				amount := jm.Amount
-				// 进贡0金视为直接接受惩罚
-				if amount == 0 {
-					// todo 惩罚
-					continue
-				}
-				res := currentPlayer.JinGong(amount)
-				if res {
-					//todo 通知客户端
-					logger.GetLogger().Printf("玩家%d进贡%金成功", id, amount)
-				} else {
-					//todo 通知客户端
-					logger.GetLogger().Printf("玩家%d进贡%金失败", id, amount)
-				}
-				hasJinGongOrPunished = true
-				continue
-			}
-
-			// 未进贡惩罚
-			if !hasJinGongOrPunished {
-				// todo 惩罚
-				hasJinGongOrPunished = true
-			}
-
-			switch msg.GetType() {
-			case MSG_USEBLACKCARD:
-				// 已经买白,无法出黑
-				if execBlackOrWhite == define.WHITE_STAGE {
-					//todo 通知客户端
-					continue
-				}
-				um := msg.(UseBlackMessage)
-				bc := currentPlayer.CheckBlackCardDeck(um.BlackCardID)
-				mt := this.MapData.GetTileAt(um.DestX, um.DestY)
-				currentPlayer.PutBlackCardToMap(mt, bc, this)
-				execBlackOrWhite = define.BLACK_STAGE
-				break
-			case MSG_BUYWHITECARD:
-				// 已经出黑,无法买白
-				if execBlackOrWhite == define.BLACK_STAGE {
-					//todo 通知客户端
-					continue
-				}
-				bw := msg.(BuyWhiteMessage)
-				res := currentPlayer.BuyWhiteCard(bw.WhiteCardType, bw.WhiteCardNum)
-				if res {
-					// 购买成功
-					execBlackOrWhite = define.WHITE_STAGE
-					// todo 通知客户端
-				} else {
-					// 购买失败
-					// todo 通知客户端
-				}
-				continue
-			default:
-				isEndXingZheng = true
-				break
-
-			}
-			//收到其他消息 行政阶段结束
-			if isEndXingZheng {
-				break
-			}
-
-		}
-
-		// 调遣阶段
-		for {
-			break
-		}
-
-		// 修整阶段
-		for {
-			break
-		}
-
-		logger.GetLogger().Printf("本年第%d个人事阶段结束,属于玩家%d", idx, id)
-	}
-
 	logger.GetLogger().Println("人事阶段结束")
-
-	logger.GetLogger().Printf("第%d年结束\n", this.Round)
 	//下一年
 	this.Round++
 }
@@ -191,15 +87,15 @@ func NewController() *Controller {
 	players := make([]*Player, PlayerNum)
 	for i := 0; i < PlayerNum; i++ {
 		players[i] = &Player{
-			ID:              i,
-			Country:         define.C_EMPTY,
-			Capital:         nil,
-			BlackCardsDeck:  nil,
-			GongNum:         0,
-			BuNum:           0,
-			QiNum:           0,
-			CheNum:          0,
-			BlackCardsInMap: nil,
+			ID:             i,
+			Country:        define.C_EMPTY,
+			Capital:        nil,
+			BlackCardsDeck: nil,
+			BuNum:          0,
+			GongNum:        0,
+			QiNum:          0,
+			CheNum:         0,
+			//BlackCardsInMap: nil,
 			CanUseBlackCard: false,
 			CanBuyWhite:     false,
 
@@ -212,21 +108,19 @@ func NewController() *Controller {
 			},
 		}
 	}
-	//初始化消息队列
-	MessageChan := make(chan *Message, 100)
-	SeqOfInitialTurn := make([]int, PlayerNum)
-	for i := 0; i < PlayerNum; i++ {
-		SeqOfInitialTurn[i] = i
-	}
+	round := 1
 	c := &Controller{
-		Round:              1,
-		SeqOfCurrentRound:  SeqOfInitialTurn,
+		Round:              round,
 		MapData:            mapData,
-		MessageChan:        MessageChan,
 		Players:            players,
 		DestiniesInPool:    destinyPool,
 		AvailableCountries: availableCountries,
 		Countries:          availableCountries,
 	}
 	return c
+}
+
+func test() {
+	a := Controller{}
+	go a.Run()
 }
