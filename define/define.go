@@ -38,6 +38,28 @@ const (
 )
 
 const (
+	STAGE_XINGZHENG = iota
+	STAGE_DIAOQIAN
+	STAGE_XIUZHENG
+)
+
+// 武器代码
+const (
+	WEAPON_BU = iota
+	WEAPON_GONG
+	WEAPON_QI
+	WEAPON_CHE
+)
+
+// 武器价格
+const (
+	PRICE_WEAPON_BU   = 3
+	PRICE_WEAPON_GONG = 4
+	PRICE_WEAPON_QI   = 5
+	PRICE_WEAPON_CHE  = 6
+)
+
+const (
 	M_EMPTY = iota
 	M_SHAN
 	M_SHUI
