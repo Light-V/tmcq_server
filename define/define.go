@@ -73,3 +73,6 @@ const (
 	W_C_QI   = 3
 	W_C_CHE  = 4
 )
+
+//士气价格
+var PRICE_SHIQI []int = []int{1, 2, 3, 4, 5}
