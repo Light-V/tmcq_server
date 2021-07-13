@@ -9,6 +9,7 @@ const (
 	MSG_BUYSHIQI
 	MSG_SELLWEAPON
 	MSG_SELLBLACKCARD
+	MSG_MAKECHOICE
 )
 
 type Message interface {
@@ -61,4 +62,9 @@ type SellWeaponMessage struct {
 
 type SellBlackCardMessage struct {
 	Message
+}
+
+type MakeChoiceMessage struct {
+	Message
+	Choice int
 }

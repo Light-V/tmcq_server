@@ -46,6 +46,7 @@ func (this *Controller) Run() {
 		player.Select(this)
 		logger.GetLogger().Printf("玩家%d选择完成\n", player.ID)
 	}
+
 	//正常循环
 	for {
 		this.RunNormalYear()
@@ -191,17 +192,17 @@ func NewController() *Controller {
 	players := make([]*Player, PlayerNum)
 	for i := 0; i < PlayerNum; i++ {
 		players[i] = &Player{
-			ID:              i,
-			Country:         define.C_EMPTY,
-			Capital:         nil,
-			BlackCardsDeck:  nil,
-			GongNum:         0,
-			BuNum:           0,
-			QiNum:           0,
-			CheNum:          0,
+			ID:             i,
+			Country:        define.C_EMPTY,
+			Capital:        nil,
+			BlackCardsDeck: nil,
+			GongNum:        0,
+			BuNum:          0,
+			QiNum:          0,
+			CheNum:         0,
 			//BlackCardsInMap: nil,
-			CanUseBlackCard: false,
-			CanBuyWhite:     false,
+			CanUseBlackCardNum: 1,
+			CanBuyWhite:        false,
 
 			PlayerBoard: PlayerBoard{
 				Money:                  0,
@@ -229,4 +230,13 @@ func NewController() *Controller {
 		Countries:          availableCountries,
 	}
 	return c
+}
+
+func (this *Controller) GetPlayerByCountry(country int) *Player {
+	for i := 0; i < len(this.Players); i++ {
+		if this.Players[i].Country == country {
+			return this.Players[i]
+		}
+	}
+	return nil
 }

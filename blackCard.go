@@ -8,6 +8,7 @@ type BlackCard interface {
 	TriggerLeaveMapEffect(controller *Controller)
 	TriggerEnterAlterEffect(controller *Controller)
 	GetCardType() int
+	GetCountry() int
 	GetCardID() int
 }
 
@@ -77,6 +78,11 @@ func (this *HumanAndGroundBase) GetCardType() int {
 func (this *HumanAndGroundBase) GetCardID() int {
 
 	return this.ID
+}
+
+func (this *HumanAndGroundBase) GetCountry() int {
+
+	return this.Country
 }
 
 func (this *HumanAndGroundBase) GetGold(controller *Controller) {

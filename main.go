@@ -1,27 +1,51 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
-type A struct {
-	a int
-}
-
-type B struct {
-	A
-	b int
+type Data struct {
+	value       int
+	isProcessed chan bool
 }
 
 func main() {
 
 	//c := NewController()
 	//c.Run()
-	s := []int{10, 20, 30}
-	fmt.Println(s)
+	inChan := make(chan *Data, 2)
+	outChanNum := 3
+	outChans := make([]chan *Data, 0, outChanNum)
+	for i := 0; i < outChanNum; i++ {
+		outChans = append(outChans, make(chan *Data, 1))
+	}
 
-	s = append(s, 40)
-	fmt.Println(s)
+	go func() {
+		cnt := 0
+		for {
+			inData := Data{cnt, make(chan bool)}
+			inChan <- &inData
+			fmt.Printf("Data %d in\n", inData.value)
+			<-inData.isProcessed
+			cnt += 1
+			if cnt >= 10 {
+				close(inChan)
+				return
+			}
+		}
+	}()
 
-	s = append(s[0:2], s[3:]...)
-	fmt.Println(s)
+	for {
+		selectedChan := rand.Intn(outChanNum)
+		inData, isOn := <-inChan
+		if !isOn {
+			return
+		}
+		outChans[selectedChan] <- inData
+		outData := <-outChans[selectedChan]
+		fmt.Printf("OutChannel %d outputs: %d\n", selectedChan, outData.value)
+		close(outData.isProcessed)
+	}
 
 }

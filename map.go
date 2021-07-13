@@ -3,6 +3,7 @@ package main
 import (
 	"container/list"
 	"main/define"
+	"main/util"
 )
 
 type Map struct {
@@ -37,10 +38,11 @@ type MapTile struct {
 	OwnerID         int
 	OwnerCountry    int
 	HumanCards      *list.List
-	GroundCards     *list.List
-	QianJunType     int
-	ZhongJunType    int
-	XiaJunType      int
+	GroundCards     *list.List //都城和地形卡都存放在这里
+	//Traders			*list.List //宋国某些卡所在的地图格专用
+	QianJunType  int
+	ZhongJunType int
+	XiaJunType   int
 
 	//CanBePutBlacCard bool
 
@@ -48,7 +50,9 @@ type MapTile struct {
 
 	CanAttack bool
 
-	CanBeAttacked bool
+	canAddWhite bool //进攻后不可增兵
+
+	//CanBeAttacked bool
 }
 
 func (this *Map) IsValidTile(x int, y int) bool {
@@ -80,5 +84,43 @@ func (this *MapTile) GetWhiteCardFromThisTileTODeck(player *Player) {
 }
 
 func (this *MapTile) UpdateMapTileOwner() {
+	if this.HumanCards.Len() == 0 && this.GroundCards.Len() == 0 {
+		this.OwnerCountry = define.C_EMPTY
+	} else if this.HumanCards.Len() == 0 && this.GroundCards.Len() == 1 {
+		this.OwnerCountry = util.GetListElementAt(this.GroundCards, 0).Value.(BlackCard).GetCountry()
+	}
 
+}
+
+func (this *MapTile) UpdateMapTileRemainPut() {
+	this.UpdateMapTileOwner()
+	if this.OwnerCountry == define.C_EMPTY {
+		this.RemainPutHuman = 1
+		this.RemainPutGround = 1
+	} else if this.OwnerID == define.C_QIN {
+		this.RemainPutHuman = 3 - this.HumanCards.Len() - this.GroundCards.Len()
+		this.RemainPutGround = 3 - this.HumanCards.Len() - this.GroundCards.Len()
+	} else if true /*TODO 其他国家情况 */ {
+
+	}
+
+}
+
+func (this *Map) HaveMyNeighTile(mapTile *MapTile, myCountry int) bool {
+	x := mapTile.X
+	y := mapTile.Y
+	return (this.IsValidTile(x+1, y) && this.GetTileAt(x+1, y).OwnerCountry == myCountry) ||
+		(this.IsValidTile(x-1, y) && this.GetTileAt(x-1, y).OwnerCountry == myCountry) ||
+		(this.IsValidTile(x, y+1) && this.GetTileAt(x, y+1).OwnerCountry == myCountry) ||
+		(this.IsValidTile(x, y-1) && this.GetTileAt(x, y-1).OwnerCountry == myCountry)
+
+}
+
+func (this *MapTile) IsThisTileCanBeAttacked() bool {
+	//TODO  人类黑卡   地形卡  国都卡
+	if this.HumanCards.Len() == 0 && this.GroundCards.Len() == 0 {
+		return false
+	}
+
+	return false
 }
